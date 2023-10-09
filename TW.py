@@ -1,3 +1,4 @@
+#code by Sabrina Yan and ChatGPT 3.5
 import gmaps
 import googlemaps
 import collections 
@@ -7,7 +8,7 @@ import matplotlib.pyplot as plt
 from IPython.display import display
 import requests
 import json
-# Replace with your own Google API key
+# Replace with your own Google API key,this api key only works for me
 google_api_key = 'AIzaSyDkUMceiQ-9zSkB4RlJwMvH14lNO1SZ48k'
 
 # Initialize the Google Maps client
@@ -552,12 +553,11 @@ for restaurant in restaurants:
 
     if places['status'] == 'OK':
         try:
-            if places['results'][0]['rating'] < 3.9 or 'location' not in places['results'][0]['geometry']:
+            if places['results'][0]['rating'] < 3.9:
                 print(f"{restaurant['name']} rating too low")
             elif 'location' not in places['results'][0]['geometry']:
                 print(f"No results found for {restaurant['name']}")
             else:
-                #print(places['results'][0]['rating'])
                 restaurant['rating']=places['results'][0]['rating']
                 locations = [(places['results'][0]['geometry']['location']['lat'], places['results'][0]['geometry']['location']['lng'])]
                 restaurant['lat'],restaurant['lng'] = locations[0][0],locations[0][1]
@@ -601,9 +601,6 @@ for res in rest_res:
 # Format the JavaScript array as a string
 restaurants_data_js = json.dumps(restaurants_data)
 
-# 1. Read the HTML File
-#with open('workspls.html', 'r', encoding='utf-8') as file:
-#    html_content = file.read()
 # Define the HTML template
 html_template = """
 <!DOCTYPE html>
