@@ -1,21 +1,5 @@
 #code by Sabrina Yan and ChatGPT 3.5
-import gmaps
-import googlemaps
-import collections 
-from collections.abc import Iterable 
-collections.Iterable = Iterable
-import matplotlib.pyplot as plt
-from IPython.display import display
-import requests
-import json
-# Replace with your own Google API key,this api key only works for me
-google_api_key = 'AIzaSyDkUMceiQ-9zSkB4RlJwMvH14lNO1SZ48k'
 
-# Initialize the Google Maps client
-gmaps_client = googlemaps.Client(key=google_api_key)
-
-# Initialize gmaps for displaying the results on a map
-gmaps.configure(api_key=google_api_key)
 
 # Define a list of restaurants and their addresses
 restaurants = [
@@ -546,6 +530,36 @@ restaurants = [
     },  
 ]
 
+import gmaps
+import googlemaps
+import collections 
+from collections.abc import Iterable 
+collections.Iterable = Iterable
+import matplotlib.pyplot as plt
+from IPython.display import display
+import requests
+import json
+###
+#for reviews
+from textblob import TextBlob
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
+import os
+import certifi
+
+# Set the SSL_CERT_FILE environment variable to the path of the certificate bundle
+os.environ['SSL_CERT_FILE'] = certifi.where()
+
+# Replace with your own Google API key,this api key only works for me
+google_api_key = 'AIzaSyDkUMceiQ-9zSkB4RlJwMvH14lNO1SZ48k'
+
+# Initialize the Google Maps client
+gmaps_client = googlemaps.Client(key=google_api_key)
+
+# Initialize gmaps for displaying the results on a map
+gmaps.configure(api_key=google_api_key)
+
+
 rest_res = []#useful restaurants
 for restaurant in restaurants:
     # Perform a text search to find the restaurant
@@ -577,6 +591,7 @@ for restaurant in restaurants:
             # Construct the direct link to the restaurant using the place ID
                         link = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
                         restaurant['link'] = link
+                        restaurant['place_id'] = place_id
                 #print(restaurant)
                 rest_res.append(restaurant)
         except KeyError:
@@ -601,6 +616,75 @@ for res in rest_res:
 # Format the JavaScript array as a string
 restaurants_data_js = json.dumps(restaurants_data)
 
+#######################################################
+#reviews for restaurants
+
+# Initialize the Sentiment Intensity Analyzer from NLTK
+nltk.download('vader_lexicon')  # Download the necessary data for VADER
+sia = SentimentIntensityAnalyzer()
+
+# Define a function to fetch reviews for a restaurant
+def get_reviews_for_restaurant(place_id):
+    # Define the Google Places API URL
+    urlr = f'https://maps.googleapis.com/maps/api/place/details/json?place_id={place_id}&fields=name,review,rating&key={google_api_key}'
+
+    # Make the GET request to the API
+    response = requests.get(urlr)
+
+    if response.status_code == 200:
+        data = response.json()
+        if 'result' in data:
+            result = data['result']
+            name = result['name']
+            reviews = result.get('reviews', [])
+
+            textblob_scores = []
+            vader_scores = []
+
+            print(f"Name: {name}")
+            #print("Reviews:")
+            for review in reviews:
+                rating = review['rating']
+                text = review['text']
+                #print(f"Rating: {rating}")
+                #print(f"Review: {text}")
+
+                # Perform sentiment analysis using TextBlob
+                analysis = TextBlob(text)
+                textblob_sentiment = analysis.sentiment.polarity
+
+                # Perform sentiment analysis using NLTK's Sentiment Intensity Analyzer (VADER)
+                vader_sentiment = sia.polarity_scores(text)['compound']
+
+                textblob_scores.append(textblob_sentiment)
+                vader_scores.append(vader_sentiment)
+
+
+                # You can add your own logic here to analyze sentiments further
+
+            # Calculate the average sentiment scores for TextBlob and VADER
+            try:
+                average_textblob_score = sum(textblob_scores) / len(textblob_scores)
+                average_vader_score = sum(vader_scores) / len(vader_scores)
+
+            # Print the summary
+                print(f"Average TextBlob Sentiment: {average_textblob_score}")
+                print(f"Average VADER Sentiment: {average_vader_score}\n")
+            except ZeroDivisionError:
+                print(f"No reviews found for {restaurant['name']}")
+
+        else:
+            print("Place not found.")
+    else:
+        print(f"Failed to retrieve data for Place ID: {place_id}")
+
+
+# Iterate through the list and fetch reviews for each restaurant
+for restaurant in rest_res:
+    place_id = restaurant["place_id"]
+    print(f"Fetching reviews for restaurant with Place ID: {place_id}")
+    get_reviews_for_restaurant(place_id)
+
 # Define the HTML template
 html_template = """
 <!DOCTYPE html>
@@ -622,13 +706,13 @@ html_template = """
       // Create markers for restaurants
       var restaurants = {restaurant_data};
       
-      restaurants.forEach(function(restaurant) {{
-        var position = {{ lat: restaurant.latitude, lng: restaurant.longitude }};
-        var marker = new google.maps.Marker({{
+      restaurants.forEach(function(restaurant) {
+        var position = { lat: restaurant.latitude, lng: restaurant.longitude };
+        var marker = new google.maps.Marker({
           position: position,
           map: map,
           title: restaurant.name,
-        }});
+        });
         
         // Create an info window for the restaurant
         var contentString = `<div>
@@ -637,15 +721,15 @@ html_template = """
           <a href="${restaurant.link}" target="_blank">View on Google Maps</a>
         </div>`;
         
-        var infowindow = new google.maps.InfoWindow({{
+        var infowindow = new google.maps.InfoWindow({
           content: contentString,
-        }});
+        });
         
         // Open the info window when the marker is clicked
         marker.addListener('click', function () {{
           infowindow.open(map, marker);
         }});
-      }});
+      });
     }
   </script>
   <script async defer
