@@ -559,63 +559,6 @@ gmaps_client = googlemaps.Client(key=google_api_key)
 # Initialize gmaps for displaying the results on a map
 gmaps.configure(api_key=google_api_key)
 
-
-rest_res = []#useful restaurants
-for restaurant in restaurants:
-    # Perform a text search to find the restaurant
-    places = gmaps_client.places(restaurant['name'] + ' ' + restaurant['address'])
-
-    if places['status'] == 'OK':
-        try:
-            if places['results'][0]['rating'] < 3.9:
-                print(f"{restaurant['name']} rating too low")
-            elif 'location' not in places['results'][0]['geometry']:
-                print(f"No results found for {restaurant['name']}")
-            else:
-                restaurant['rating']=places['results'][0]['rating']
-                locations = [(places['results'][0]['geometry']['location']['lat'], places['results'][0]['geometry']['location']['lng'])]
-                restaurant['lat'],restaurant['lng'] = locations[0][0],locations[0][1]
-                name = restaurant["name"]
-                latitude = restaurant["lat"]
-                longitude = restaurant["lng"]
-
-                url = f"https://maps.googleapis.com/maps/api/place/textsearch/json?query={name}&location={latitude},{longitude}&key={google_api_key}"
-                response = requests.get(url)
-
-                if response.status_code == 200:
-                    search_results = response.json()
-                    if "results" in search_results and search_results["results"]:
-            # Extract the details of the first result (assuming it's the best match)
-                        place_id = search_results["results"][0]["place_id"]
-            
-            # Construct the direct link to the restaurant using the place ID
-                        link = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
-                        restaurant['link'] = link
-                        restaurant['place_id'] = place_id
-                #print(restaurant)
-                rest_res.append(restaurant)
-        except KeyError:
-            print(f"No results found for {restaurant['name']}")
-            #print(places['results'][0])
-    else:
-        print(f"No results found for {restaurant['name']}")
-
-restaurants_data = []
-for res in rest_res:
-    # Create a JavaScript object (JSON) for each restaurant
-    restaurant_data = {
-        "name": res["name"],
-        "latitude": res["lat"],
-        "longitude": res["lng"],
-        "rating": res["rating"],
-        "link": res["link"]
-    }
-    # Append the JavaScript object to the array
-    restaurants_data.append(restaurant_data)
-
-# Format the JavaScript array as a string
-restaurants_data_js = json.dumps(restaurants_data)
-
 #######################################################
 #reviews for restaurants
 
@@ -667,9 +610,15 @@ def get_reviews_for_restaurant(place_id):
                 average_textblob_score = sum(textblob_scores) / len(textblob_scores)
                 average_vader_score = sum(vader_scores) / len(vader_scores)
 
-            # Print the summary
+                # Print the summary
                 print(f"Average TextBlob Sentiment: {average_textblob_score}")
                 print(f"Average VADER Sentiment: {average_vader_score}\n")
+                if average_textblob_score < 0.3 or average_vader_score < 0.5:
+                    return 'low rating in reviews'
+                elif 0.2 < average_textblob_score < 0.7 and 0.2 < average_vader_score < 0.7:
+                    return 'fine rating in reviews'
+                else:#one of the score above 0.7 and both above 0.2
+                    return 'worth to go'
             except ZeroDivisionError:
                 print(f"No reviews found for {restaurant['name']}")
 
@@ -678,12 +627,68 @@ def get_reviews_for_restaurant(place_id):
     else:
         print(f"Failed to retrieve data for Place ID: {place_id}")
 
+#####################################################################
+rest_res = []#useful restaurants
+for restaurant in restaurants:
+    # Perform a text search to find the restaurant
+    places = gmaps_client.places(restaurant['name'] + ' ' + restaurant['address'])
 
-# Iterate through the list and fetch reviews for each restaurant
-for restaurant in rest_res:
-    place_id = restaurant["place_id"]
-    print(f"Fetching reviews for restaurant with Place ID: {place_id}")
-    get_reviews_for_restaurant(place_id)
+    if places['status'] == 'OK':
+        try:
+            if places['results'][0]['rating'] < 3.9:
+                print(f"{restaurant['name']} rating too low")
+            elif 'location' not in places['results'][0]['geometry']:
+                print(f"No results found for {restaurant['name']}")
+            else:
+                restaurant['rating']=places['results'][0]['rating']
+                locations = [(places['results'][0]['geometry']['location']['lat'], places['results'][0]['geometry']['location']['lng'])]
+                restaurant['lat'],restaurant['lng'] = locations[0][0],locations[0][1]
+                name = restaurant["name"]
+                latitude = restaurant["lat"]
+                longitude = restaurant["lng"]
+
+                url = f"https://maps.googleapis.com/maps/api/place/textsearch/json?query={name}&location={latitude},{longitude}&key={google_api_key}"
+                response = requests.get(url)
+
+                if response.status_code == 200:
+                    search_results = response.json()
+                    if "results" in search_results and search_results["results"]:
+            # Extract the details of the first result (assuming it's the best match)
+                        place_id = search_results["results"][0]["place_id"]
+                        print(f"Fetching reviews for restaurant with Place ID: {place_id}")
+                        review_rating = get_reviews_for_restaurant(place_id)
+                        print(review_rating)
+            
+            # Construct the direct link to the restaurant using the place ID
+                        link = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
+                        restaurant['link'] = link
+                        restaurant['review_rating'] = review_rating
+                        #restaurant['place_id'] = place_id
+                #print(restaurant)
+                rest_res.append(restaurant)
+        except KeyError:
+            print(f"No results found for {restaurant['name']}")
+            #print(places['results'][0])
+    else:
+        print(f"No results found for {restaurant['name']}")
+
+restaurants_data = []
+for res in rest_res:
+    # Create a JavaScript object (JSON) for each restaurant
+    restaurant_data = {
+        "name": res["name"],
+        "latitude": res["lat"],
+        "longitude": res["lng"],
+        "rating": res["rating"],
+        "link": res["link"],
+        'review_rating': res['review_rating']
+    }
+    # Append the JavaScript object to the array
+    restaurants_data.append(restaurant_data)
+
+# Format the JavaScript array as a string
+restaurants_data_js = json.dumps(restaurants_data)
+
 
 # Define the HTML template
 html_template = """
@@ -696,41 +701,53 @@ html_template = """
 <body>
   <div id="map" style="height: 950px; width: 100%;"></div>
   <script>
-    function initMap() {
-      var mapOptions = {
+    async function initMap() {
+      const { Map } = await google.maps.importLibrary("maps");
+      const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+      const map = new Map(document.getElementById("map"), {
         center: { lat: 23.6978, lng: 120.9605 },  // Centered on Taiwan
         zoom: 8,
-      };
-      var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+      });
+
       
       // Create markers for restaurants
       var restaurants = {restaurant_data};
-      
       restaurants.forEach(function(restaurant) {
         var position = { lat: restaurant.latitude, lng: restaurant.longitude };
+        var iconColor = (restaurant.review_rating === 'worth to go') ? 'yellow' : 'blue';
+
         var marker = new google.maps.Marker({
           position: position,
           map: map,
           title: restaurant.name,
+          icon: {
+            path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+            fillColor: iconColor,
+            fillOpacity: 0.7,
+            strokeWeight: 2,
+            scale: 5
+          }
         });
-        
+
         // Create an info window for the restaurant
         var contentString = `<div>
           <h3>${restaurant.name}</h3>
           <p>Rating: ${restaurant.rating}</p>
+          <p>Review: ${restaurant.review_rating}</p>
           <a href="${restaurant.link}" target="_blank">View on Google Maps</a>
         </div>`;
-        
+
         var infowindow = new google.maps.InfoWindow({
           content: contentString,
         });
-        
+
         // Open the info window when the marker is clicked
-        marker.addListener('click', function () {{
+        marker.addListener('click', function () {
           infowindow.open(map, marker);
-        }});
+        });
       });
     }
+    initMap();
   </script>
   <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkUMceiQ-9zSkB4RlJwMvH14lNO1SZ48k&callback=initMap">
