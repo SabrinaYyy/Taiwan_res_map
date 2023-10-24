@@ -585,12 +585,13 @@ def get_reviews_for_restaurant(place_id):
             vader_scores = []
 
             print(f"Name: {name}")
-            #print("Reviews:")
+            print("Reviews_number:", len(reviews))#### only have 5 reviews for each place
             for review in reviews:
                 rating = review['rating']
                 text = review['text']
-                #print(f"Rating: {rating}")
-                #print(f"Review: {text}")
+                print(f"Rating: {rating}")
+                print(f"Review: {text}")
+
 
                 # Perform sentiment analysis using TextBlob
                 analysis = TextBlob(text)
@@ -626,6 +627,8 @@ def get_reviews_for_restaurant(place_id):
             print("Place not found.")
     else:
         print(f"Failed to retrieve data for Place ID: {place_id}")
+
+
 
 #####################################################################
 rest_res = []#useful restaurants
