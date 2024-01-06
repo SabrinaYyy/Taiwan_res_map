@@ -561,72 +561,71 @@ gmaps.configure(api_key=google_api_key)
 
 #######################################################
 #reviews for restaurants
-
 # Initialize the Sentiment Intensity Analyzer from NLTK
-nltk.download('vader_lexicon')  # Download the necessary data for VADER
-sia = SentimentIntensityAnalyzer()
+#nltk.download('vader_lexicon')  # Download the necessary data for VADER
+#sia = SentimentIntensityAnalyzer()
 
 # Define a function to fetch reviews for a restaurant
-def get_reviews_for_restaurant(place_id):
+#def get_reviews_for_restaurant(place_id):
     # Define the Google Places API URL
-    urlr = f'https://maps.googleapis.com/maps/api/place/details/json?place_id={place_id}&fields=name,review,rating&key={google_api_key}'
+#    urlr = f'https://maps.googleapis.com/maps/api/place/details/json?place_id={place_id}&fields=name,review,rating&key={google_api_key}'
 
     # Make the GET request to the API
-    response = requests.get(urlr)
+#    response = requests.get(urlr)
 
-    if response.status_code == 200:
-        data = response.json()
-        if 'result' in data:
-            result = data['result']
-            name = result['name']
-            reviews = result.get('reviews', [])
+#    if response.status_code == 200:
+#        data = response.json()
+#        if 'result' in data:
+#            result = data['result']
+#            name = result['name']
+#            reviews = result.get('reviews', [])
 
-            textblob_scores = []
-            vader_scores = []
+#            textblob_scores = []
+#            vader_scores = []
 
-            print(f"Name: {name}")
-            print("Reviews_number:", len(reviews))#### only have 5 reviews for each place
-            for review in reviews:
-                rating = review['rating']
-                text = review['text']
-                print(f"Rating: {rating}")
-                print(f"Review: {text}")
+#            print(f"Name: {name}")
+#            print("Reviews_number:", len(reviews))#### only have 5 reviews for each place
+#            for review in reviews:
+#                rating = review['rating']
+#                text = review['text']
+#                print(f"Rating: {rating}")
+#                print(f"Review: {text}")
 
 
                 # Perform sentiment analysis using TextBlob
-                analysis = TextBlob(text)
-                textblob_sentiment = analysis.sentiment.polarity
+#                analysis = TextBlob(text)
+#                textblob_sentiment = analysis.sentiment.polarity
 
                 # Perform sentiment analysis using NLTK's Sentiment Intensity Analyzer (VADER)
-                vader_sentiment = sia.polarity_scores(text)['compound']
+#                vader_sentiment = sia.polarity_scores(text)['compound']
 
-                textblob_scores.append(textblob_sentiment)
-                vader_scores.append(vader_sentiment)
+#                textblob_scores.append(textblob_sentiment)
+#                vader_scores.append(vader_sentiment)
 
 
                 # You can add your own logic here to analyze sentiments further
 
             # Calculate the average sentiment scores for TextBlob and VADER
-            try:
-                average_textblob_score = sum(textblob_scores) / len(textblob_scores)
-                average_vader_score = sum(vader_scores) / len(vader_scores)
+#            try:
+#                average_textblob_score = sum(textblob_scores) / len(textblob_scores)
+#                average_vader_score = sum(vader_scores) / len(vader_scores)
 
                 # Print the summary
-                print(f"Average TextBlob Sentiment: {average_textblob_score}")
-                print(f"Average VADER Sentiment: {average_vader_score}\n")
-                if average_textblob_score < 0.3 or average_vader_score < 0.5:
-                    return 'low rating in reviews'
-                elif 0.2 < average_textblob_score < 0.7 and 0.2 < average_vader_score < 0.7:
-                    return 'fine rating in reviews'
-                else:#one of the score above 0.7 and both above 0.2
-                    return 'worth to go'
-            except ZeroDivisionError:
-                print(f"No reviews found for {restaurant['name']}")
+#                print(f"Average TextBlob Sentiment: {average_textblob_score}")
+#                print(f"Average VADER Sentiment: {average_vader_score}\n")
+#                if average_textblob_score < 0.3 or average_vader_score < 0.5:
+#                    return 'low rating in reviews'
+#                elif 0.2 < average_textblob_score < 0.7 and 0.2 < average_vader_score < 0.7:
+#                    return 'fine rating in reviews'
+#                else:#one of the score above 0.7 and both above 0.2
+#                    return 'worth to go'
+#            except ZeroDivisionError:
+#                print(f"No reviews found for {restaurant['name']}")
 
-        else:
-            print("Place not found.")
-    else:
-        print(f"Failed to retrieve data for Place ID: {place_id}")
+#        else:
+#            print("Place not found.")
+#    else:
+#        print(f"Failed to retrieve data for Place ID: {place_id}")
 
 
 
@@ -659,13 +658,13 @@ for restaurant in restaurants:
             # Extract the details of the first result (assuming it's the best match)
                         place_id = search_results["results"][0]["place_id"]
                         print(f"Fetching reviews for restaurant with Place ID: {place_id}")
-                        review_rating = get_reviews_for_restaurant(place_id)
-                        print(review_rating)
+                        #review_rating = get_reviews_for_restaurant(place_id)
+                        #print(review_rating)
             
             # Construct the direct link to the restaurant using the place ID
                         link = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
                         restaurant['link'] = link
-                        restaurant['review_rating'] = review_rating
+                        #restaurant['review_rating'] = review_rating
                         #restaurant['place_id'] = place_id
                 #print(restaurant)
                 rest_res.append(restaurant)
@@ -684,7 +683,7 @@ for res in rest_res:
         "longitude": res["lng"],
         "rating": res["rating"],
         "link": res["link"],
-        'review_rating': res['review_rating']
+        #'review_rating': res['review_rating']
     }
     # Append the JavaScript object to the array
     restaurants_data.append(restaurant_data)
