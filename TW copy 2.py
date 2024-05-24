@@ -175,7 +175,7 @@ import certifi
 os.environ['SSL_CERT_FILE'] = certifi.where()
 
 # Replace with your own Google API key,this api key only works for me
-google_api_key = 'AIzaSyDkUMceiQ-9zSkB4RlJwMvH14lNO1SZ48k'
+google_api_key = 
 
 # Initialize the Google Maps client
 gmaps_client = googlemaps.Client(key=google_api_key)
