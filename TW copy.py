@@ -1,5 +1,3 @@
-#code by Sabrina Yan and ChatGPT 3.5
-
 
 # Define a list of restaurants and their addresses
 restaurants = [
