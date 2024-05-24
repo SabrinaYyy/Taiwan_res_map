@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"> 
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkUMceiQ-9zSkB4RlJwMvH14lNO1SZ48k"></script>
+</head>
+<body>
+  <div id="map" style="height: 950px; width: 100%;"></div>
+  <script>
+    async function initMap() {
+      const { Map } = await google.maps.importLibrary("maps");
+      const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+      const map = new Map(document.getElementById("map"), {
+        center: { lat: 23.6978, lng: 120.9605 },  // Centered on Taiwan
+        zoom: 8,
+      });
+
+      
+      // Create markers for restaurants
+      var restaurants = [{"name": "\u6545\u5bab\u535a\u7269\u9662", "latitude": 25.1001943, "longitude": 121.5488431, "rating": 4.5, "link": "https://www.google.com/maps/place/?q=place_id:ChIJfUpAzTqsQjQRwQl6ORhwbV0"}, {"name": "\u9435 F.f Teppanyaki \u9435\u677f\u71d2\uff08\u842c\u5927\u5e97\uff09", "latitude": 25.0200567, "longitude": 121.496846, "rating": 4.6, "link": "https://www.google.com/maps/place/?q=place_id:ChIJUxzmnmypQjQRoZ_XCCzsuXg"}, {"name": "\u660e\u65e5\u5927\u996d\u5e97", "latitude": 25.042611, "longitude": 121.506969, "rating": 4.8, "link": "https://www.google.com/maps/place/?q=place_id:ChIJ4XLHCgmpQjQR5k7O6TLjpJY"}, {"name": "Taipei 101 Observatory", "latitude": 25.0336752, "longitude": 121.5648831, "rating": 4.5, "link": "empty link"}, {"name": "\u5eb7\u6865\u6162\u65c5", "latitude": 22.9979127, "longitude": 120.1873881, "rating": 4.3, "link": "empty link"}, {"name": "\u53cb\u7231\u8857\u65c5\u9986 (U.I.J Hotel&Hostel (UIJ))", "latitude": 22.9907857, "longitude": 120.1997749, "rating": 4.6, "link": "empty link"}, {"name": "\u53f0\u5317\u5317\u95e8\u7a9d\u6cca\u65c5 (Beimen Wow Poshtel)", "latitude": 25.0522584, "longitude": 121.5155067, "rating": 4.1, "link": "https://www.google.com/maps/place/?q=place_id:ChIJj33HwWypQjQR50Usp2bgGFo"}, {"name": "\u5be7\u590f\u591c\u5e02", "latitude": 25.0566808, "longitude": 121.5153641, "rating": 4.2, "link": "https://www.google.com/maps/place/?q=place_id:ChIJxUXPVmupQjQRtBB6oj-S5qI"}, {"name": "\u738b\u798f\u828b\u5713", "latitude": 25.0434307, "longitude": 121.5080796, "rating": 4.9, "link": "https://www.google.com/maps/place/?q=place_id:ChIJP5udl5KpQjQRwOlbR6hgJTU"}, {"name": "Neko coffee \u8c93\u73c8", "latitude": 25.044772, "longitude": 121.516604, "rating": 4.9, "link": "empty link"}, {"name": "\u6d25\u5bcc\u5009 \u624b\u4f5c\u6e2f\u5f0f\u863f\u8514\u7cd5 \u5c0f\u7c60\u6e6f\u5305 \u5c0f\u71d2\u5305", "latitude": 25.0199745, "longitude": 121.4978471, "rating": 4.7, "link": "https://www.google.com/maps/place/?q=place_id:ChIJKQ7klUmpQjQRfGS9_i1unmo"}, {"name": "\u85cf\u58fd\u53f8\uff08\u751c\u54c1\uff09", "latitude": 25.0456068, "longitude": 121.5147159, "rating": 4.2, "link": "https://www.google.com/maps/place/?q=place_id:ChIJqfksL3OpQjQRmeB0N3r3L8g"}, {"name": "\u58fd\u53f8\u90ce", "latitude": 25.0458267, "longitude": 121.5147169, "rating": 4.1, "link": "https://www.google.com/maps/place/?q=place_id:ChIJ4WlbTSipQjQRtfKi0Z35pmc"}, {"name": "\u5408\u9ede\u58fd\u53f8 \u304c\u3063\u3066\u3093\u5bff\u53f8 \u4eac\u7ad9\u5e97", "latitude": 25.0493354, "longitude": 121.5170516, "rating": 3.9, "link": "empty link"}, {"name": "\u6b66\u8056\u591c\u5e02", "latitude": 23.003458, "longitude": 120.1905098, "rating": 4.3, "link": "https://www.google.com/maps/place/?q=place_id:ChIJc9IkfkJ2bjQRD5USkR9J1ck"}, {"name": "Chun\u7eaf\u858f\u4ec1", "latitude": 22.990765, "longitude": 120.1994887, "rating": 4.5, "link": "https://www.google.com/maps/place/?q=place_id:ChIJ73pH6mR2bjQRODp683lXdw0"}, {"name": "\u7acb\u541e\u5bff\u53f8", "latitude": 22.9913741, "longitude": 120.1994941, "rating": 4.3, "link": "https://www.google.com/maps/place/?q=place_id:ChIJUQdGTxh3bjQRecgPWDJ36HE"}, {"name": "\u9eb5\u5c4b \u58d3\u8ef8", "latitude": 22.9969802, "longitude": 120.2011191, "rating": 4.6, "link": "https://www.google.com/maps/place/?q=place_id:ChIJ8fA4hpB3bjQRPc4W25snXoY"}, {"name": "\u9e3f\u54c1\u725b\u8089\u6c64", "latitude": 23.0089769, "longitude": 120.2655632, "rating": 4.4, "link": "https://www.google.com/maps/place/?q=place_id:ChIJlRCjnSdxbjQR4gNq5vpTGTk"}, {"name": "\u90b1\u5bb6\u5c0f\u5377\u7c73\u7c89", "latitude": 22.9992392, "longitude": 120.1995835, "rating": 4, "link": "empty link"}, {"name": "\u4e00\u7165\u95dc\u6771\u716e", "latitude": 22.9956479, "longitude": 120.2149069, "rating": 4.9, "link": "https://www.google.com/maps/place/?q=place_id:ChIJNzZvLJJ3bjQRqX-uQgT-260"}, {"name": "\u8001\u539d1933\u71d2\u70e4", "latitude": 22.9903893, "longitude": 120.2103846, "rating": 4, "link": "https://www.google.com/maps/place/?q=place_id:ChIJGz-0T492bjQRFdRv3XUjPiI"}, {"name": "\u5c0f\u9e7f\u5bb6 \u9762\u5305\u5e97", "latitude": 23.0332691, "longitude": 120.1884145, "rating": 4.5, "link": "https://www.google.com/maps/place/?q=place_id:ChIJF-pFMLF3bjQRA_e78z_IUS8"}, {"name": "\u5c0f\u8d64\u4f6c\u5e72\u9505 \u5fe0\u4e49\u5e97", "latitude": 22.9946578, "longitude": 120.2033685, "rating": 4.3, "link": "https://www.google.com/maps/place/?q=place_id:ChIJ4zvXGGJ2bjQRTKO2lp6uKfw"}, {"name": "\u963f\u6c5f\u9cdd\u9c7c\u610f\u9762", "latitude": 22.998366, "longitude": 120.1969602, "rating": 3.9, "link": "empty link"}, {"name": "\u9752\u697c\u4e2d\u5f0f\u9910\u9152\u9986", "latitude": 25.0497304, "longitude": 121.5708786, "rating": 4.7, "link": "empty link"}, {"name": "\u91d1\u6cf0\u65e5\u5f0f\u6599\u7406-\u5185\u6e56\u5e97", "latitude": 25.0689154, "longitude": 121.5761273, "rating": 4.1, "link": "https://www.google.com/maps/place/?q=place_id:ChIJv8ymJnmsQjQRRRJ4b0I9LDw"}, {"name": "\u5df4\u96f7\u5df4\u96f7\u5370\u5ea6\u9910\u5385", "latitude": 25.0486993, "longitude": 121.5576705, "rating": 4.9, "link": "https://www.google.com/maps/place/?q=place_id:ChIJJ-1vL8CrQjQR5-OL_J-WxL8"}, {"name": "Solo Pasta", "latitude": 25.0391961, "longitude": 121.5506541, "rating": 4.5, "link": "https://www.google.com/maps/place/?q=place_id:ChIJwQPcmc-rQjQRtXDQA__PPwg"}, {"name": "\u5174\u6ce2\u5496\u5561 \u534e\u5c71\u65d7\u8230\u5e97", "latitude": 25.0439031, "longitude": 121.5276904, "rating": 4.4, "link": "empty link"}, {"name": "\u961c\u676d\u8c46\u6d46", "latitude": 25.0442333, "longitude": 121.5248433, "rating": 4.1, "link": "empty link"}, {"name": "\u6e29\u5496\u55b1 Wen Curry", "latitude": 25.0416068, "longitude": 121.5269461, "rating": 4.8, "link": "empty link"}, {"name": "\u53cc\u6708\u98df\u54c1\u793e \u9752\u5c9b\u5e97", "latitude": 25.0437017, "longitude": 121.5220376, "rating": 4.8, "link": "https://www.google.com/maps/place/?q=place_id:ChIJgbsfD3GpQjQR7z5ZO22KdVQ"}, {"name": "Oh my!\u539f\u71d2 \u53f0\u5317\u6797\u68ee\u5317\u5e97", "latitude": 25.0508364, "longitude": 121.5252147, "rating": 4.7, "link": "https://www.google.com/maps/place/?q=place_id:ChIJ70ymUG-pQjQR7JxW3MeQrJs"}, {"name": "\u5c0f\u4ed3\u5c4b\u9cd7\u9c7c\u996d", "latitude": 25.0396837, "longitude": 121.5561847, "rating": 4, "link": "https://www.google.com/maps/place/?q=place_id:ChIJgyNpOsarQjQRzBTe39lNNnA"}, {"name": "\u4e8c\u5c4b\u7261\u8823\u62c9\u9eb5", "latitude": 25.0545469, "longitude": 121.5201726, "rating": 4.1, "link": "empty link"}, {"name": "\u963f\u67d1\u59e8\u828b\u5706", "latitude": 25.1077498, "longitude": 121.84365, "rating": 4.2, "link": "empty link"}, {"name": "CHLIV New Taipei Jiufen", "latitude": 25.1102348, "longitude": 121.8450594, "rating": 4.6, "link": "empty link"}];
+      restaurants.forEach(function(restaurant) {
+        var position = { lat: restaurant.latitude, lng: restaurant.longitude };
+        var iconColor = (restaurant.rating >= '4.5') ? 'yellow' : 'blue';
+        if (restaurant.type === 'restaurant') {
+    // If it's a restaurant, keep the iconColor as it is (based on rating)
+        } else if (restaurant.type === 'hotel') {
+            iconColor = 'green'; // If it's a hotel, set the label color to green
+        } 
+
+        var marker = new google.maps.Marker({
+          position: position,
+          map: map,
+          title: restaurant.name,
+          icon: {
+            path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+            fillColor: iconColor,
+            fillOpacity: 0.7,
+            strokeWeight: 2,
+            scale: 5
+          }
+        });
+
+        // Create an info window for the restaurant
+        var contentString = `<div>
+          <h3>${restaurant.name}</h3>
+          <p>Rating: ${restaurant.rating}</p>
+          <a href="${restaurant.link}" target="_blank">View on Google Maps</a>
+        </div>`;
+
+        var infowindow = new google.maps.InfoWindow({
+          content: contentString,
+        });
+
+        // Open the info window when the marker is clicked
+        marker.addListener('click', function () {
+          infowindow.open(map, marker);
+        });
+      });
+    }
+    initMap();
+  </script>
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkUMceiQ-9zSkB4RlJwMvH14lNO1SZ48k&callback=initMap">
+  </script>
+</body>
+</html>
